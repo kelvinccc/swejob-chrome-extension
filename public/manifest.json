@@ -1,7 +1,7 @@
 {
   "name": "SWE Job Application Tool",
   "description": "Makes applying to SWE jobs easier on chrome",
-  "version": "0.1",
+  "version": "0.0.1",
   "manifest_version": 3,
   "permissions" : ["storage"],
   "action" : {
