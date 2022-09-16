@@ -4,24 +4,32 @@
     <!--<link rel="stylesheet" href="button.css">-->
   </head>
   <body>
-    <form id="infoForm">
-      <label for="fname">First name:</label>
-      <input type="text" id="fname" name="fname"></input>
-
-      <label for="lname">Last name:</label>
-      <input type="text" id="lname" name="lname"></input>
-
-      <label for="email">Email:</label>
-      <input type="email" id="email" name="email"></input>
-
-      <label for="telephone">Telephone:</label>
-      <input type="text" id="telephone" name="telephone"></input>
-
-      <label for="linkedin">Linkedin:</label>
-      <input type="text" id="linkedin" name="linkedin"></input>
-      
-      <input type="submit" value="Submit" id="submit">
-    </form>
+    <div id="editClose"><button id="cornerButton">Close</button></div>
+    <div id="main">
+      <form id="infoForm">
+        <div id="fnameContainer" class="container">
+          <label for="fname">First name:</label>
+          <input type="text" id="fname" name="fname"></input>
+        </div>
+        <div id="lnameContainer" class="container">
+          <label for="lname">Last name:</label>
+          <input type="text" id="lname" name="lname"></input>
+        </div>
+        <div id="emailContainer" class="container">
+          <label for="email">Email:</label>
+          <input type="email" id="email" name="email"></input>
+        </div>
+        <div id="telephoneContainer" class="container">
+          <label for="telephone">Telephone:</label>
+          <input type="text" id="telephone" name="telephone"></input>
+        </div>
+        <div id="linkedContainer" class="container">
+          <label for="linkedin">Linkedin:</label>
+          <input type="text" id="linkedin" name="linkedin"></input>
+        </div>
+        <input type="submit" value="Submit" id="submit">
+      </form>
+    </div>
   </body>
   <script src="popup.js"></script>
 </html>

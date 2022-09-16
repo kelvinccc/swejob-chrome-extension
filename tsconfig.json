@@ -9,7 +9,8 @@
      "outDir": "dist/js",
      "noEmitOnError": true,
      "typeRoots": [ "node_modules/@types" ],
-     "types" : ["chrome"]
+     "types" : ["chrome"],
+     "lib" : ["es2017", "es2017.object", "dom"]
   },
   "exclude": [
     "node_modules"
