@@ -31,6 +31,12 @@ const saveInfo = async (resumeInfo : ResumeInfo) => {
   chrome.runtime.sendMessage({ action: 'saveInfo', resumeInfo })
 }
 
+const getInfo = async () => {
+  const info = await chrome.runtime.sendMessage({ action: 'getInfo' })
+  console.log(info)
+  return info
+}
+
 // Takes each input and builds a ResumeInfo object
 const parseForm = () => {
   const resumeInfo = {
@@ -64,29 +70,28 @@ const handleSaveButton = (event : Event) => {
   const resumeInfo = parseForm()
   saveInfo(resumeInfo)
   // Save info to sync storage API
-  displayInfo(resumeInfo)
+  displayInfo(resumeInfo, () => generateInfoHTML(resumeInfo, 'info'))
   changeCornerButton('edit')
 }
 
-const handleCloseButton = (event : Event) => {
-  const resumeInfo = parseForm()
-  displayInfo(resumeInfo)
+const handleCloseButton = async (event : Event) => {
+  const resumeInfo = await getInfo()
+  displayInfo(resumeInfo, () => generateInfoHTML(resumeInfo, 'info'))
+  changeCornerButton('edit')
+}
+
+const handleEditButton = async (event : Event) => {
+  const resumeInfo = await getInfo()
+  displayInfo(resumeInfo, () => generateFormHTML(resumeInfo, 'form'))
   changeCornerButton('close')
 }
 
-const handleEditButton = (event : Event) => {
-  const resumeInfo = parseForm()
-  displayInfo(resumeInfo)
-  changeCornerButton('close')
-}
-
-const displayInfo = (resumeInfo : ResumeInfo) => {
+const displayInfo = (resumeInfo : ResumeInfo, generateFn : () => HTMLElement) => {
   const main = document.getElementById('main')
   if (main === null) {
     // error
     return
   }
-  console.log(resumeInfo)
 
   if (!Object.entries) {
     Object.entries = function (obj : any) {
@@ -100,21 +105,65 @@ const displayInfo = (resumeInfo : ResumeInfo) => {
     }
   }
   main.firstElementChild?.remove()
-  const infoContainer = document.createElement('div')
-  infoContainer.id = 'infoContainer'
+  const container = generateFn()
+  console.log(container)
+  main.appendChild(container)
+}
+
+const generateFormHTML = (resumeInfo : ResumeInfo, containerId : string) => {
+  const container = document.createElement('form')
+  container.id = containerId
+  for (const [key, value] of Object.entries(resumeInfo)) {
+    const label = document.createElement('label')
+    label.htmlFor = key
+    label.innerHTML = key
+    const input = document.createElement('input')
+    input.value = value
+    input.id = key
+    input.name = key
+    input.type = 'text'
+
+    // Incredibly janky loophole here, come back and fix elegantly :)
+    if (key === 'email') {
+      input.type = 'email'
+    }
+
+    const formContainer = document.createElement('div')
+    formContainer.id = key + 'Container'
+    formContainer.appendChild(label)
+    formContainer.appendChild(input)
+    container.appendChild(formContainer)
+  }
+  const saveButton = document.createElement('input')
+  saveButton.type = 'submit'
+  saveButton.value = 'save'
+  saveButton.id = 'submit'
+
+  saveButton.onclick = (event: Event) => {
+    event.preventDefault()
+    handleSaveButton(event)
+  }
+
+  container.appendChild(saveButton)
+  return container
+}
+
+const generateInfoHTML = (resumeInfo : ResumeInfo, containerId : string) => {
+  const container = document.createElement('div')
+  container.id = containerId
   for (const [key, value] of Object.entries(resumeInfo)) {
     const name = document.createElement('h3')
     name.innerHTML = key
     const valueHeader = document.createElement('h4')
     valueHeader.innerHTML = value
 
-    const container = document.createElement('div')
-    container.id = key + 'Container'
-    container.appendChild(name)
-    container.appendChild(valueHeader)
-    infoContainer.appendChild(container)
+    const infoContainer = document.createElement('div')
+    infoContainer.id = key + 'Container'
+    infoContainer.appendChild(name)
+    infoContainer.appendChild(valueHeader)
+    container.appendChild(infoContainer)
   }
-  main.appendChild(infoContainer)
+  return container
 }
 
 const changeCornerButton = (action : string) => {

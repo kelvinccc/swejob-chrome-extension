@@ -1,10 +1,46 @@
 const DEBUG = false
+const INFO_ITEMS = {
+  fname: '',
+  lname: '',
+  email: '',
+  phone: '',
+  linkedin: ''
+}
+
+type ResumeI = {
+  'fname': string,
+  'lname': string,
+  'email': string,
+  'phone': string,
+  'linkedin': string
+}
+
+let info = {
+  fname: '',
+  lname: '',
+  email: '',
+  phone: '',
+  linkedin: ''
+}
+
+chrome.runtime.onStartup.addListener(async () => {
+  const resumeInfo = await getStorageItem(info as ResumeI)
+  if (typeof resumeInfo === 'undefined') {
+    await setStorageItem(INFO_ITEMS)
+  } else {
+    info = resumeInfo as ResumeI
+  }
+})
 
 chrome.runtime.onMessage.addListener(async (message, sender, sendResponse) => {
   if (message.action === 'saveInfo') {
     await setStorageItem(message.resumeInfo)
+    await setResumeInfo(message.resumeInfo)
     sendResponse(true)
     return true // return true to indicate to have sendResponse be called asynchronously
+  } else if (message.action === 'getInfo') {
+    sendResponse(info)
+    return true
   }
 })
 
@@ -22,7 +58,7 @@ const setStorageItem = async (item : StorageItem) => {
   })
 }
 
-const getStorageItem = async (keys: string | string[]) => {
+const getStorageItem = async (keys: string | string[] | ResumeI) => {
   return new Promise((resolve, reject) => {
     chrome.storage.sync.get(keys, (items) => {
       if (DEBUG) {
@@ -37,4 +73,12 @@ const getStorageItem = async (keys: string | string[]) => {
       return resolve(items)
     })
   })
+}
+
+const setResumeInfo = async (resumeInfo : ResumeI) => {
+  info = resumeInfo
+}
+
+const getResumeInfo = async () => {
+  return info
 }
