@@ -3,20 +3,6 @@ const CORNER_BUTTON = 'cornerButton'
 const save = document.getElementById(SAVE)
 const cornerButton = document.getElementById(CORNER_BUTTON)
 
-if (save !== null) {
-  save.onclick = (event: Event) => {
-    event.preventDefault()
-    handleSaveButton(event)
-  }
-}
-
-if (cornerButton !== null) {
-  cornerButton.onclick = (event: Event) => {
-    event.preventDefault()
-    handleCloseButton(event)
-  }
-}
-
 type ResumeInfo = {
   'fname': string,
   'lname': string,
@@ -25,21 +11,41 @@ type ResumeInfo = {
   'linkedin': string
 }
 
-// Saves ResumeInfo object to sync storage
+const init = () => {
+  if (save !== null) {
+    save.onclick = (event: Event) => {
+      event.preventDefault()
+      handleSaveButton(event)
+    }
+  }
+  if (cornerButton !== null) {
+    cornerButton.onclick = (event: Event) => {
+      event.preventDefault()
+      handleCloseButton(event)
+    }
+  }
+}
+
+init()
+
+/*
+  Saves ResumeInfo object to sync storage && updates resumeInfo object in background.js
+*/
 const saveInfo = async (resumeInfo : ResumeInfo) => {
-  console.log(resumeInfo)
   chrome.runtime.sendMessage({ action: 'saveInfo', resumeInfo })
 }
 
+/*
+  Grab current state of resumeInfo from background.js
+*/
 const getInfo = async () => {
   const info = await chrome.runtime.sendMessage({ action: 'getInfo' })
-  console.log(info)
   return info
 }
 
 // Takes each input and builds a ResumeInfo object
 const parseForm = () => {
-  const resumeInfo = {
+  const resumeInfo : ResumeInfo = {
     fname: '',
     lname: '',
     email: '',
@@ -47,6 +53,7 @@ const parseForm = () => {
     linkedin: ''
   }
 
+  // Grab inputs from the form and append values to resumeInfo. Ignores the submit button (A little janky, come back to fix later)
   const inputs = document.querySelectorAll('input')
   for (const input in inputs) {
     if (inputs[input].type !== 'submit' && hasKey(resumeInfo, inputs[input].name)) {
@@ -65,11 +72,14 @@ function hasKey<O> (obj : O, key : PropertyKey) : key is keyof O {
   return key in obj
 }
 
+// Event handlers:
+
 const handleSaveButton = (event : Event) => {
   // Parse each input and...
   const resumeInfo = parseForm()
-  saveInfo(resumeInfo)
   // Save info to sync storage API
+  saveInfo(resumeInfo)
+  // Display onto popup.html
   displayInfo(resumeInfo, () => generateInfoHTML(resumeInfo, 'info'))
   changeCornerButton('edit')
 }
@@ -93,6 +103,7 @@ const displayInfo = (resumeInfo : ResumeInfo, generateFn : () => HTMLElement) =>
     return
   }
 
+  // Double checking to see if this entries exists, otherwise polyfills it.
   if (!Object.entries) {
     Object.entries = function (obj : any) {
       const ownProps = Object.keys(obj)
@@ -106,7 +117,6 @@ const displayInfo = (resumeInfo : ResumeInfo, generateFn : () => HTMLElement) =>
   }
   main.firstElementChild?.remove()
   const container = generateFn()
-  console.log(container)
   main.appendChild(container)
 }
 
@@ -168,12 +178,11 @@ const generateInfoHTML = (resumeInfo : ResumeInfo, containerId : string) => {
 
 const changeCornerButton = (action : string) => {
   const button = document.getElementById('cornerButton')
-  if (button === null) return
+  if (button === null) throw Error('cornerbutton is null')
   button.innerHTML = action
   switch (action) {
     case 'edit' : {
       button.onclick = (event: Event) => {
-        console.log('edit')
         handleEditButton(event)
       }
       break
@@ -182,7 +191,6 @@ const changeCornerButton = (action : string) => {
       button.onclick = (event: Event) => {
         handleCloseButton(event)
       }
-      console.log('close')
       break
     }
     default : console.log('error')

@@ -1,18 +1,21 @@
 const DEBUG = false
-const INFO_ITEMS = {
-  fname: '',
-  lname: '',
-  email: '',
-  phone: '',
-  linkedin: ''
-}
 
+// Type declaration for the object representing information to input onto resume
 type ResumeI = {
   'fname': string,
   'lname': string,
   'email': string,
   'phone': string,
   'linkedin': string
+}
+
+// empty Template that represents default values for the ResumeInfo Object
+const INFO_ITEMS : ResumeI = {
+  fname: '',
+  lname: '',
+  email: '',
+  phone: '',
+  linkedin: ''
 }
 
 let info = {
@@ -75,10 +78,7 @@ const getStorageItem = async (keys: string | string[] | ResumeI) => {
   })
 }
 
+// update resumeInfo object
 const setResumeInfo = async (resumeInfo : ResumeI) => {
   info = resumeInfo
-}
-
-const getResumeInfo = async () => {
-  return info
 }
